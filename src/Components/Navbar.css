@@ -1,0 +1,79 @@
+.navbar {
+  display: flex;
+  justify-content: space-between; /* 左右に要素を配置 */
+  align-items: center; /* 要素を縦方向に中央揃え */
+  z-index: 1000;
+  height: 50px;
+  background-color: #49d42d;
+  padding: 0 20px; /* ナビゲーションバーの両端に余白を追加 */
+  margin-bottom: 10px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 40px;
+  padding-top: 5px;
+  padding-right: 20px;
+  margin-left: auto; /* 左端から自動で右側に配置 */
+}
+
+.nav-links a {
+  display: flex;
+  text-decoration: none;
+  color: white;
+  transition: all 0.1s;
+}
+
+.nav-links a:hover {
+  color: cadetblue;
+  cursor: pointer;
+  font-size: 1.15em;
+}
+
+.nav-links a svg {
+  margin-right: 7px;
+}
+
+/* メニューアイコンのスタイル */
+.menu-icon {
+  display: none;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+/* モバイル対応のメディアクエリ */
+@media (max-width: 600px) {
+  .navbar {
+    justify-content: flex-end;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-right: 0;
+    padding-left: 0;
+    gap: 10px;
+    height: auto;
+  }
+
+  .menu-icon {
+    display: block;
+    margin-right: auto;
+    padding-left: 18px;
+    color: white;
+  }
+
+  .nav-links {
+    display: none;
+    list-style: none;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 10px 0;
+  }
+}

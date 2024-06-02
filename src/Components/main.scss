@@ -1,0 +1,436 @@
+@import "../styles/variables";
+@import "../styles/mixins";
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff !important; /* 水色 */
+}
+
+.container,
+.reset-container {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;
+  width: 100%;
+  max-width: 450px;
+  align-items: center;
+}
+
+.reset-container {
+  margin-top: 20px;
+}
+
+.container p {
+  width: 100%;
+  text-align: center;
+  margin-top: 5px;
+  margin-bottom: 8px;
+}
+
+.content,
+.content2,
+.content3,
+.content-link,
+.content4,
+.content-logout,
+.signup-form-toggle-password:hover,
+.content-email,
+.login-button,
+.login-button-e,
+.login-button-s,
+.reset-button {
+  width: 90%;
+  max-width: 500px; /* これを調整 */
+  color: rgb(245, 245, 249);
+  background-color: $blue-color;
+  padding: 10px 20px;
+  transition: 200ms;
+  border-radius: 5px;
+  @include box-shadow;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  position: relative;
+}
+
+.content p {
+  background-color: #f9f9f9;
+  color: #000;
+  width: 100%;
+  height: 50px;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.content2 {
+  width: 430px;
+  background-color: $midle-blue-color;
+}
+.content3 {
+  margin: 20px 0 -20px 0;
+  padding: 15px 0 10px 0;
+  width: 430px;
+}
+
+.content4 {
+  width: 90%;
+  display: flex;
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.content-logout {
+  background-color: $midle-blue-color;
+  margin-top: 10px;
+  padding: 20px;
+}
+
+.content4 ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+content4 li {
+  margin: 510px 0;
+  width: 100%;
+}
+
+.content4 a {
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.content-link {
+  width: 500px;
+  background-color: $midle-blue-color;
+}
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: 1px solid;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.content-email {
+  margin-top: -5px;
+  width: 450px;
+}
+
+.content label,
+.content-email label,
+.links-lable {
+  font-size: 20px;
+}
+.content {
+  margin-top: 15px;
+  padding-bottom: 15px;
+}
+.inner-content {
+  margin-top: -10px;
+  width: 90%;
+  background-color: #fffdfd;
+  color: #414141;
+  margin: 20px;
+}
+
+.login-button,
+.button-logout {
+  color: $blue-color;
+  background-color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  @include box-shadow;
+}
+
+.login-button-e,
+.login-button-s {
+  margin-top: 36px;
+  padding: 10px 10px;
+}
+
+.login-button-e {
+  width: 100px;
+  margin-left: 20px;
+  color: $blue-color;
+  font-size: 16px;
+  background-color: #f9f9f9;
+}
+
+.login-button-s {
+  background-color: rgb(98, 98, 172);
+  width: 120px;
+  font-size: 10px;
+}
+
+.login-content label {
+  margin-bottom: -20px;
+}
+.login-input {
+  padding: 8px;
+  margin-top: 10px;
+  width: 90%;
+}
+
+.login-input-e {
+  padding: 8px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 90%;
+}
+
+.container button:hover {
+  background-color: $hover-color;
+  cursor: pointer;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  z-index: 1001;
+}
+
+.button-block {
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  height: 50px;
+  padding-right: 50px;
+  gap: 45px;
+}
+
+.reset-button {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.signup-form-title {
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  justify-items: center;
+  margin-bottom: -5px;
+}
+
+.signup-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: $blue-color;
+  flex-direction: column;
+  margin: 10px 10px 10px 25px;
+  color: white;
+  width: 90%;
+}
+
+.signup-form p {
+  color: white;
+  width: 90%;
+  font-size: 20px;
+}
+
+.lubi {
+  color: white;
+  width: 90%;
+  font-size: 12px;
+  text-align: left;
+  margin-bottom: 3px;
+}
+.signup-form-input {
+  margin-bottom: 10px;
+  padding: 5px;
+  width: 90%; /* 初期幅を設定 */
+  max-width: 500px; /* 最大幅を設定 */
+  border: none;
+}
+
+.signup-form-input-password {
+  margin-bottom: 10px;
+  padding: 5px;
+  width: 290px; /* ボタンの幅を除いた幅 */
+}
+
+.signup-form-input-password-confirm {
+  margin-bottom: 10px;
+  padding: 5px;
+  width: 360px; /* ボタンの幅を除いた幅 */
+}
+.signup-form-password {
+  display: flex;
+}
+
+.signup-form-toggle-password {
+  padding: 0; /* パディングを小さく */
+  background-color: #19b021;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 10px; /* フォントサイズを小さく */
+  @include box-shadow;
+}
+.signup-form-toggle-password:hovar {
+  background-color: #1eb300;
+}
+
+.signup-password-show-button {
+  background-color: rgb(93, 103, 178);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  margin-left: 20px;
+  @include box-shadow;
+  height: 25px;
+  text-align: center;
+  justify-items: center;
+  border-radius: 3px;
+  font-size: 14px;
+}
+
+.signup-password-show-button:hover {
+  background-color: #1eb300;
+}
+
+.signup-form-button {
+  background-color: rgb(21, 36, 154);
+  color: #fff;
+  border: none;
+  height: 40px;
+  font-size: 16px;
+  @include box-shadow;
+  width: 400px;
+  border-radius: 5px;
+  margin: 10px 20px 20px 25px;
+}
+
+.signup-form-button:hover {
+  background-color: #1eb300;
+  cursor: pointer; /* カーソルを指に変更 */
+  font-size: 17px;
+}
+
+.signup-form-toggle-password {
+  padding: 0; /* パディングを小さく */
+  background-color: #8ac6ee;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 10px; /* フォントサイズを小さく */
+  @include box-shadow;
+  width: 20px; /* 幅を調整 */
+  height: 20px; /* 高さを調整 */
+}
+
+.signup-form-toggle-password:hover {
+  background-color: #1eb300;
+  cursor: pointer; /* カーソルを指に変更 */
+  font-size: 14px;
+}
+
+.signup-success-message {
+  background-color: aliceblue;
+  color: #0056b3;
+  width: 300px;
+  height: 50px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
+  @include box-shadow;
+}
+
+/* Links.css */
+
+.links-label {
+  color: $blue-color;
+  text-align: center;
+  padding-top: 20px;
+  font-size: 25px;
+  font-weight: bold;
+  width: 600px;
+}
+
+.links-content a {
+  display: block; /* リンクを縦に並べる */
+  text-decoration: none;
+  color: rgb(240, 240, 246); /* リンクの色 */
+  background-color: rgb(21, 36, 154);
+  margin: 10px 20px 20px 20px;
+  padding: 10px 20px;
+  transition: 200ms;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
+  box-shadow: 8px 8px 8px -5px #414141;
+  font-size: 1.2rem;
+  width: 400px;
+}
+
+.links-content a:hover {
+  color: rgb(32, 200, 97); /* マウスオーバー時のリンクの色 */
+  cursor: pointer; /* カーソルを指に変更 */
+  font-size: 1.25rem; /* フォントサイズを大きく */
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: 1px solid;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+@media (max-width: 500px) {
+  .container {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .links-content {
+    width: 100%;
+  }
+  .links-content a {
+    width: 80%;
+    font-size: 15px;
+  }
+
+  .login-input-e {
+    width: 85%;
+  }
+  .login-input {
+    width: 85%;
+  }
+}

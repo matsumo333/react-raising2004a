@@ -1,0 +1,11 @@
+/* App.css */
+
+.over-Container {
+  background-color: blue;
+}
+.calendar-container {
+  max-width: 300px; /* カレンダーの最大幅を設定 */
+  margin: 0 auto; /* カレンダーを中央揃え */
+  padding: 50px;
+  background-color: blue;
+}

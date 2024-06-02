@@ -1,0 +1,20 @@
+.sankasumi {
+  width: 100%;
+  padding: 10px;
+  background-color: #21d89b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.event_title {
+  background-color: rgb(25, 51, 223);
+  height: 40px;
+}
+
+.participantList {
+  width: 100px;
+  margin: 5px;
+}/*# sourceMappingURL=EventList.css.map */
