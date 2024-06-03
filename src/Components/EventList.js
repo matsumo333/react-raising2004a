@@ -9,54 +9,49 @@ const EventList = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [userEventParticipation, setUserEventParticipation] = useState({});
   const [participantCounts, setParticipantCounts] = useState({});
+  const [allEventMembers, setAllEventMembers] = useState([]); // 追加
   const navigate = useNavigate();
   const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth") === "true");
   const [accountName, setAccountName] = useState(localStorage.getItem("accountName"));
-console.log("ユーザーアカウント",accountName);
-  /**
-   * 初回レンダリングなど？にイベントのリストをデータベースから取得する 
-   * 
-   */
+  console.log("ユーザーアカウント", accountName);
 
+  // ページ閲覧十分後にホームに移動（データベース読み込み対策）
   useEffect(() => {
-    const fetchEvents = async () => {
+    const timer = setTimeout(() => {
+      navigate('/');
+    }, 120000);
+
+    return () => clearTimeout(timer); // クリーンアップ
+  }, [navigate]);
+
+  // イベントリストとイベントメンバーのデータを取得する
+  useEffect(() => {
+    const fetchEventsAndMembers = async () => {
       const eventCollection = collection(db, 'events');
       const eventSnapshot = await getDocs(eventCollection);
       const eventList = eventSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setEvents(eventList);
+
+      const eventMembersQuery = collection(db, 'event_members');
+      const eventMembersSnapshot = await getDocs(eventMembersQuery);
+      setAllEventMembers(eventMembersSnapshot.docs.map((doc) => doc.data())); // 追加
     };
 
-    fetchEvents();
+    fetchEventsAndMembers();
   }, []);
 
-  /**
-   * navigateが実行するたびに、参加者の氏名や参加人数が取得する
-   */
-
+  // ユーザーの参加情報を取得する
   useEffect(() => {
-
-   /**
-    * イベントの応じた参加者情報を取得する
-    * @param {} userId 
-    * 参加者情報を排出
-    */
     const fetchUserEventParticipation = async (userId) => {
-      const eventMembersQuery = query(
-        collection(db, 'event_members'),
-        where('memberId', '==', userId)
-      );
-      const eventMembersSnapshot = await getDocs(eventMembersQuery);
-      const userParticipation = eventMembersSnapshot.docs.reduce((acc, doc) => {
-        acc[doc.data().eventId] = true;
+      const userParticipation = allEventMembers.reduce((acc, member) => {
+        if (member.memberId === userId) {
+          acc[member.eventId] = true;
+        }
         return acc;
       }, {});
       setUserEventParticipation(userParticipation);
     };
 
-     /**
-     * メンバ名が未登録の場合、登録を促す
-     * @param {*} userId 
-    */
     const checkMemberRegistration = async (userId) => {
       const membersQuery = query(collection(db, 'members'), where('author.id', '==', userId));
       const membersSnapshot = await getDocs(membersQuery);
@@ -65,11 +60,6 @@ console.log("ユーザーアカウント",accountName);
         navigate('/member');
       }
     };
-
-    /** ユーザーの情報が変更されると？？？？承認状態の変更があった場合、必要な情報を取得する。
-     *  
-     * 
-     */
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
@@ -80,54 +70,32 @@ console.log("ユーザーアカウント",accountName);
     });
 
     return unsubscribe;
-  }, [navigate]);
+  }, [navigate, allEventMembers]);
 
-  /**
-   * 
-   * 
-   */
+  // 参加人数を取得する
   useEffect(() => {
     const fetchParticipantCounts = async () => {
       if (events.length > 0) {
-        const eventIds = events.map(event => event.id);
-        const eventMembersQuery = query(
-          collection(db, 'event_members'),
-          where('eventId', 'in', eventIds)
-        );
-        const eventMembersSnapshot = await getDocs(eventMembersQuery);
-        const counts = {};
-        eventIds.forEach(eventId => {
-          const participants = eventMembersSnapshot.docs.filter(doc => doc.data().eventId === eventId);
-          counts[eventId] = participants.length;
-        });
+        const counts = events.reduce((acc, event) => {
+          const participants = allEventMembers.filter(member => member.eventId === event.id);
+          acc[event.id] = participants.length;
+          return acc;
+        }, {});
         setParticipantCounts(counts);
       }
     };
-  
+
     fetchParticipantCounts();
-  }, [events]);
-  
+  }, [events, allEventMembers]);
 
-/**
- * ログインするとき、
- * @param {*} eventId 
- * @returns 
- */
   const handleJoinEvent = async (eventId) => {
-
- /**
- * ログインしていない時、ログイン画面に遷移する
- * 
- */
     if (!currentUser) {
       console.log('User is not logged in');
       alert('ログインしてください');
       navigate('/login');
       return;
     }
-/**
- * イベントを追加する
- */
+
     const eventRef = doc(db, 'events', eventId);
     await updateDoc(eventRef, {
       participants: arrayUnion(currentUser.uid)
@@ -136,7 +104,7 @@ console.log("ユーザーアカウント",accountName);
     await addDoc(collection(db, 'event_members'), {
       eventId: eventId,
       memberId: currentUser.uid,
-            accountName:accountName
+      accountName: accountName
     });
 
     navigate('/confirmation');
@@ -146,14 +114,12 @@ console.log("ユーザーアカウント",accountName);
     try {
       console.log("Event to delete: ", id);
       await deleteDoc(doc(db, "events", id));
-      // イベントを削除した後、events ステートを更新して再レンダリングをトリガー
       setEvents(events.filter(event => event.id !== id));
       navigate("/eventlist");
     } catch (error) {
       console.error("Error deleting event: ", error);
     }
   };
-  
 
   return (
     <div className="eventListContainer">
@@ -184,7 +150,7 @@ console.log("ユーザーアカウント",accountName);
               <td>{event.court_surface}</td>
               <td>
                 <div className="participantList">
-                  <ParticipantList eventId={event.id} />
+                  <ParticipantList eventId={event.id} allEventMembers={allEventMembers} />
                 </div>
               </td>
               <td>
@@ -210,51 +176,36 @@ console.log("ユーザーアカウント",accountName);
   );
 };
 
-/**
- * 参加者リストデータを作成
- *  @param {} param0 
- * @returns 
- */
-const ParticipantList = ({ eventId }) => {
+const ParticipantList = ({ eventId, allEventMembers }) => {
   const [participantNames, setParticipantNames] = useState([]);
   const navigate = useNavigate();
 
-  const fetchParticipants = async () => {
-    // すべての参加者データを取得
-    const eventMembersQuery = collection(db, 'event_members');
-    const eventMembersSnapshot = await getDocs(eventMembersQuery);
-
-    // eventId に基づいてフィルタリングした参加者のアカウント名を取得
-    const names = eventMembersSnapshot.docs
-      .filter(doc => doc.data().eventId === eventId)
-      .map(doc => {
-        const memberData = doc.data();
-        console.log("こっちがメンバー",memberData);
-        // アカウント登録がされている場合、アカウント名を取得
-        if (memberData.accountName) {
-          return (
-            <button
-              key={memberData.memberId}
-              onClick={() => navigate(`/eventcancel/${eventId}`)}
-              style={{ fontSize: '16px', padding: '1px', marginBottom: '1px', backgroundColor: 'rgb(25, 51, 223)' }}
-            >
-              {memberData.accountName}
-            </button>
-          );
-        } else {
-          alert('あなたはメンバー名が未登録です。メンバー登録でお名前を登録してください。');
-          navigate('/member');
-          return null;
-        }
-      });
-
-    setParticipantNames(names);
-  };
-
-  // イベントが変わるたびに参加者情報を更新
   useEffect(() => {
+    const fetchParticipants = () => {
+      const names = allEventMembers
+        .filter(member => member.eventId === eventId)
+        .map(member => {
+          if (member.accountName) {
+            return (
+              <button
+                key={member.memberId}
+                onClick={() => navigate(`/eventcancel/${eventId}`)}
+                style={{ fontSize: '16px', padding: '1px', marginBottom: '1px', backgroundColor: 'rgb(25, 51, 223)' }}
+              >
+                {member.accountName}
+              </button>
+            );
+          } else {
+            alert('あなたはメンバー名が未登録です。メンバー登録でお名前を登録してください。');
+            navigate('/member');
+            return null;
+          }
+        });
+      setParticipantNames(names);
+    };
+
     fetchParticipants();
-  }, [eventId]);
+  }, [eventId, allEventMembers, navigate]);
 
   return (
     <div>
@@ -262,6 +213,5 @@ const ParticipantList = ({ eventId }) => {
     </div>
   );
 };
-
 
 export default EventList;
