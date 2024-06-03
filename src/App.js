@@ -25,6 +25,7 @@ import Test from "./Components/Test";
 import Confirmation from "./Components/Confirmation";
 function App() {
   const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
+  const [accountName, setAccountName] = useState(localStorage.getItem("accountName"));
 
   return (
     <Router>
@@ -51,7 +52,7 @@ function App() {
         <Route path="/eventform" element={<EventForm isAuth={isAuth} />} />
         <Route path="/eventedit" element={<EventEdit isAuth={isAuth} />} />
         <Route path="/eventedit/:id" element={<EventEdit isAuth={isAuth} />} />
-        <Route path="/eventlist" element={<EventList isAuth={isAuth} />} />
+        <Route path="/eventlist" element={<EventList isAuth={isAuth} accountName={accountName} />} />
         <Route path="/eventcancel/:id" element={<Eventcan isAuth={isAuth} />} />
         <Route path="/confirmation" element={<Confirmation isAuth={isAuth} />} />
         <Route

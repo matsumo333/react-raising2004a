@@ -1,32 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { db, auth, provider } from "../firebase"; // providerは使用していないので削除
+import { db, auth, provider } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import "./main.scss";
 
-const Login = ({setIsAuth}) => {
-  const navigate =useNavigate();
+const Login = ({ setIsAuth }) => {
+  const navigate = useNavigate();
   const [accountName, setAccountName] = useState(null);
-  const loginInWithGoogle = () =>{
-  //Googleでログイン
-  signInWithPopup(auth,provider).then((result) =>{
-    localStorage.setItem('isAuth',true);
-    setIsAuth(true);
-    console.log(result);
-    navigate("/");
-  });
- };
-
-  const handleEmailLogin = () => {
-    navigate("/emaillogin");
-  };
-
-  const redirectToSignupForm = () => {
-    navigate("/signupform");
-  };
 
   useEffect(() => {
+    // localStorageからaccountNameを取得してstateにセットする
+    const storedAccountName = localStorage.getItem("accountName");
+    if (storedAccountName) {
+      setAccountName(storedAccountName);
+    }
+
     const auth = getAuth();
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -38,9 +27,12 @@ const Login = ({setIsAuth}) => {
           const membersSnapshot = await getDocs(membersQuery);
 
           if (!membersSnapshot.empty) {
-            const userDoc = membersSnapshot.docs[0]; // Assuming there's only one matching document
+            const userDoc = membersSnapshot.docs[0];
             const userData = userDoc.data();
-            setAccountName(userData.accountname);
+            const accountName = userData.accountname;
+            setAccountName(accountName);
+            // accountNameをlocalStorageに保存
+            localStorage.setItem("accountName", accountName);
           } else {
             console.log("Account name not found. Redirecting to registration.");
             navigate("/member");
@@ -53,6 +45,27 @@ const Login = ({setIsAuth}) => {
 
     return unsubscribe;
   }, [navigate]);
+
+  const loginInWithGoogle = () => {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        localStorage.setItem("isAuth", true);
+        setIsAuth(true);
+        console.log(result);
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error("Error signing in with Google:", error);
+      });
+  };
+
+  const handleEmailLogin = () => {
+    navigate("/emaillogin");
+  };
+
+  const redirectToSignupForm = () => {
+    navigate("/signupform");
+  };
 
   return (
     <div className="container">

@@ -11,7 +11,8 @@ const EventList = () => {
   const [participantCounts, setParticipantCounts] = useState({});
   const navigate = useNavigate();
   const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth") === "true");
-
+  const [accountName, setAccountName] = useState(localStorage.getItem("accountName"));
+console.log("ユーザーアカウント",accountName);
   /**
    * 初回レンダリングなど？にイベントのリストをデータベースから取得する 
    * 
@@ -88,21 +89,24 @@ const EventList = () => {
   useEffect(() => {
     const fetchParticipantCounts = async () => {
       if (events.length > 0) {
+        const eventIds = events.map(event => event.id);
+        const eventMembersQuery = query(
+          collection(db, 'event_members'),
+          where('eventId', 'in', eventIds)
+        );
+        const eventMembersSnapshot = await getDocs(eventMembersQuery);
         const counts = {};
-        for (const event of events) {
-          const eventMembersQuery = query(
-            collection(db, 'event_members'),
-            where('eventId', '==', event.id)
-          );
-          const eventMembersSnapshot = await getDocs(eventMembersQuery);
-          counts[event.id] = eventMembersSnapshot.size;
-        }
+        eventIds.forEach(eventId => {
+          const participants = eventMembersSnapshot.docs.filter(doc => doc.data().eventId === eventId);
+          counts[eventId] = participants.length;
+        });
         setParticipantCounts(counts);
       }
     };
-
+  
     fetchParticipantCounts();
   }, [events]);
+  
 
 /**
  * ログインするとき、
@@ -131,17 +135,25 @@ const EventList = () => {
 
     await addDoc(collection(db, 'event_members'), {
       eventId: eventId,
-      memberId: currentUser.uid
+      memberId: currentUser.uid,
+            accountName:accountName
     });
 
     navigate('/confirmation');
   };
 
   const handleDelete = async (id) => {
-    console.log("きてtrue" + id);
-    await deleteDoc(doc(db, "events", id));
-    navigate("/eventedit");
+    try {
+      console.log("Event to delete: ", id);
+      await deleteDoc(doc(db, "events", id));
+      // イベントを削除した後、events ステートを更新して再レンダリングをトリガー
+      setEvents(events.filter(event => event.id !== id));
+      navigate("/eventlist");
+    } catch (error) {
+      console.error("Error deleting event: ", error);
+    }
   };
+  
 
   return (
     <div className="eventListContainer">
@@ -208,39 +220,38 @@ const ParticipantList = ({ eventId }) => {
   const navigate = useNavigate();
 
   const fetchParticipants = async () => {
-    const eventMembersQuery = query(
-      collection(db, 'event_members'),
-      where('eventId', '==', eventId)
-    );
+    // すべての参加者データを取得
+    const eventMembersQuery = collection(db, 'event_members');
     const eventMembersSnapshot = await getDocs(eventMembersQuery);
-    const ids = eventMembersSnapshot.docs.map((doc) => doc.data().memberId);
-/**
- * memberコレクションからアカウント名を取得する
- */
-    const names = await Promise.all(ids.map(async (memberId) => {
-      const membersQuery = query(collection(db, 'members'), where('author.id', '==', memberId));
-      const membersSnapshot = await getDocs(membersQuery);
-       //アカウント登録がされている場合、アカウント名を取得
-      if (!membersSnapshot.empty) {
-        const userDoc = membersSnapshot.docs[0];
-        const userData = userDoc.data();
-        const accountname = userData.accountname;
-        return (
-          //アカウント名のボタンを表示し、クリックするとキャンセル画面に遷移するものとする。
-          <button key={memberId} onClick={() => navigate(`/eventcancel/${eventId}`)} style={{ fontSize: '16px', padding: '1px', marginBottom: '1px', backgroundColor: 'rgb(25, 51, 223)' }}>
-            {accountname}
-          </button>
-        );
-      } else {
-        alert('あなたはメンバー名が未登録です。メンバー登録でお名前を登録してください。');
-        navigate('/member');
-      }
-    }));
+
+    // eventId に基づいてフィルタリングした参加者のアカウント名を取得
+    const names = eventMembersSnapshot.docs
+      .filter(doc => doc.data().eventId === eventId)
+      .map(doc => {
+        const memberData = doc.data();
+        console.log("こっちがメンバー",memberData);
+        // アカウント登録がされている場合、アカウント名を取得
+        if (memberData.accountName) {
+          return (
+            <button
+              key={memberData.memberId}
+              onClick={() => navigate(`/eventcancel/${eventId}`)}
+              style={{ fontSize: '16px', padding: '1px', marginBottom: '1px', backgroundColor: 'rgb(25, 51, 223)' }}
+            >
+              {memberData.accountName}
+            </button>
+          );
+        } else {
+          alert('あなたはメンバー名が未登録です。メンバー登録でお名前を登録してください。');
+          navigate('/member');
+          return null;
+        }
+      });
 
     setParticipantNames(names);
   };
 
-  //イベントが変わるたびに参加者情報を更新
+  // イベントが変わるたびに参加者情報を更新
   useEffect(() => {
     fetchParticipants();
   }, [eventId]);
@@ -251,5 +262,6 @@ const ParticipantList = ({ eventId }) => {
     </div>
   );
 };
+
 
 export default EventList;
